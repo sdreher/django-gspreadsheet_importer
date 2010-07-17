@@ -1,0 +1,7 @@
+* Directly navigating to admin/<appname>/import before admin console login results in an improper navigation to the homescreen.
+
+* Ensure universal field support
+
+* Configurable lookup field for foreign key support. Currently assumes "name"
+
+* More and better error handling

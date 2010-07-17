@@ -1,0 +1,2 @@
+recursive-include gspreadsheet_importer/templates *
+
