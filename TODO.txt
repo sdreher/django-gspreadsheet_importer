@@ -1,3 +1,5 @@
+* Enforce required fields
+
 * Directly navigating to admin/<appname>/import before admin console login results in an improper navigation to the homescreen.
 
 * Ensure universal field support
