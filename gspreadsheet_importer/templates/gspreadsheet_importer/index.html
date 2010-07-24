@@ -75,16 +75,35 @@
         </form>
         
         {% if results %}
+        {% autoescape off %}
                 <h2>Results</h2>
-                <table>
-                <tr><th>Model</th><th>Count</th></tr>
+                <table width="600px" cellspacing="2px">
+                <tr><th>Model</th><th style="text-align: center">Count</th><th>Errors</th></tr>
                 {% for k,v in results.items %}
-                    <tr><td width="35%">{{k|capfirst}}</td><td>{{v.count}}</td></tr>
+                    <tr style="background-color: #eee"><td width="35%">{{k|capfirst}}</td><td style="text-align: center">{{v.count}}</td><td>{{v.errors|length}}</td></tr>
                     {% for e in v.errors %}
-                        <tr><td/><td>{{e}}</td></tr>
+                        <tr><td/><td/><td/>
+                        {% for name, attribute in e.attributes.items %}
+                            {% ifequal name 'name' %}
+                                <b>{{name|capfirst}}</b>: {{attribute|truncatewords:5}}<br />
+                            {% endifequal %}
+                        {% endfor %}
+                        
+                        {% for name, attribute in e.attributes.items %}
+                            {% ifequal attribute 'Error' %}
+                                <b>Field</b>: {{name|capfirst}}<br />
+                            {% endifequal %}
+                        {% endfor %}
+                        
+                        {% for m in e.error_message %}
+                           <span style="color: red">{{m|capfirst}}</span>
+                        {% endfor %}
+                        </td></tr>
                     {% endfor %}
+                    
                 {% endfor %}
                 </table>
+        {% endautoescape %}
         {% endif %}
         
     {% endif %}

@@ -41,7 +41,7 @@ class SpreadsheetImporter:
           id_parts = entry.id.text.split('/')
           worksheetId = id_parts[len(id_parts) - 1]
           model = get_model(app_name, entry.title.text)
-          self.results[model._meta.verbose_name] = {'count': 0, 'errors': [] }          
+          self.results[model._meta.verbose_name] = {'count': 0, 'errors': [] }   
           
           feed = gd_client.GetListFeed(key, worksheetId)
       
@@ -76,6 +76,7 @@ class SpreadsheetImporter:
     return columns
 
   def _process_model_object(self, gd_client, entry, model, app_name):  
+    attributes = {} # for error messaging
     try:
       opts = model._meta
       obj = model() # bare model instance
@@ -90,8 +91,10 @@ class SpreadsheetImporter:
           value = column.value
           
           if value != None:
+            attributes[field.name] = 'Error'
+
             if isinstance(field, ForeignKey) or isinstance(field, OneToOneField):
-              related_model = get_model(app_name, c.get_type_name())
+              related_model = get_model(app_name, column.get_type_name())
               value, created = related_model.objects.get_or_create(name=value)
             elif isinstance(field, DateTimeField):
               t = time.strptime(value, '%m/%d/%Y %H:%M:%S')
@@ -101,6 +104,7 @@ class SpreadsheetImporter:
               value = datetime.datetime(t[0], t[1], t[2], t[3], t[4], t[5])
             
             obj.__setattr__(field.name, value)
+            attributes[field.name] = str(value)
                   
       obj.save()
       
@@ -112,15 +116,21 @@ class SpreadsheetImporter:
         if related_model_name in columns.keys():
           column = columns[related_model_name]
           if column.value != None:
+            attributes[field.name] = 'Error'
             related_model = get_model(app_name, column.get_type_name())
+            values = column.value.split(',')
             for v in column.value.split(','):
-              related_obj, created = related_model.objects.get_or_create(name=v) 
+              related_obj, created = related_model.objects.get_or_create(name=v.strip()) 
               obj.__getattribute__(field.name).add(related_obj)
+              attributes[field.name] = v.strip()
 
       obj.save()
       self.results[model._meta.verbose_name]['count'] += 1
     except:
-      self.results[model._meta.verbose_name]['errors'].append("Error: %s [%s]" % (model._meta.verbose_name, sys.exc_info()))
+      error = {}
+      error['attributes'] = attributes
+      error['error_message'] = sys.exc_info()
+      self.results[model._meta.verbose_name]['errors'].append(error)
       
 
     
