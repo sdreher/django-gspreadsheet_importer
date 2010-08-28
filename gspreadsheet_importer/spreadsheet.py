@@ -79,7 +79,7 @@ class SpreadsheetImporter:
     attributes = {} # for error messaging
     try:
       opts = model._meta
-      obj = model() # bare model instance
+      obj = None 
       columns = self._parse_columns(entry.custom) # list of columns, indexed by the model attribute name.
       
       # iterate the regular fields, these include everything but many_to_many
@@ -103,8 +103,16 @@ class SpreadsheetImporter:
               t = time.strptime(value, '%m/%d/%Y')
               value = datetime.datetime(t[0], t[1], t[2], t[3], t[4], t[5])
             
-            obj.__setattr__(field.name, value)
-            attributes[field.name] = str(value)
+            if obj == None:
+              try:
+                obj = model.objects.get(name=value)
+              except:
+                # assume DoesNotExist exception
+                obj = model() # bare model instance
+                obj.__setattr__(field.name, value)
+            else:
+              obj.__setattr__(field.name, value)
+              attributes[field.name] = str(value)
                   
       obj.save()
       
