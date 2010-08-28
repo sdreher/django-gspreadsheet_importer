@@ -23,16 +23,12 @@
     <script type="text/javascript" src="/site_media/js/admin.js"></script>
 {% endblock extrahead %}
 
-{% block branding %}
-    <h1>Blackrock Forest: Virtual Simulation</h1>
-{% endblock %}
-
 {% if not is_popup %}
 
     {% block breadcrumbs %}
     <div class="breadcrumbs">
         <a href="../">{% trans "Home" %}</a> &rsaquo; 
-        <a href="../portal">{{ app|capfirst }}</a> &rsaquo;
+        <a href="../{{app}}">{{ app|capfirst }}</a> &rsaquo;
         Import 
     </div>
     {% endblock %}
@@ -64,7 +60,7 @@
                 
                 <div class="form-row">
                    <label class="required">Delete Existing Data:</label>
-                   <input type="checkbox" name="delete_existing_data" value="true" checked/>
+                   <input type="checkbox" name="delete_existing_data" value="false"/>
                 </div>
                 
             </fieldset>
